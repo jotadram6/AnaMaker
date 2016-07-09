@@ -78,8 +78,9 @@ def GetEffHisto(CutType,CenValue,Tree,SampleName,Var,BinsLim,CutApp):
                 'g'-> great than
                 'l'-> less than
     """
-    HistName=Var+"BaseHist"
-    EffHistName=Var+"EffHist"+SampleName
+    HistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_")+"BaseHist"
+    EffHistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_")+"EffHist"+SampleName
+    print Var+" >> "+HistName+BinsLim
     if CutType=="w":
         WVar="TMath::Abs("+Var+"-"+CenValue+")"
         Tree.Draw(WVar+" >> "+HistName+BinsLim,CutApp)
