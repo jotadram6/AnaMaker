@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from array import array
 import rootnotes
 import time
+import os
+import commands as cmd
 #ROOT.gROOT.LoadMacro('tdrStyle.C')
 
 def DPHI(x):
