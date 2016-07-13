@@ -80,8 +80,8 @@ def GetEffHisto(CutType,CenValue,Tree,SampleName,Var,BinsLim,CutApp):
                 'g'-> great than
                 'l'-> less than
     """
-    HistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_")+"BaseHist"
-    EffHistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_")+"EffHist"+SampleName
+    HistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"BaseHist"
+    EffHistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"EffHist"+SampleName
     print Var+" >> "+HistName+BinsLim
     if CutType=="w":
         WVar="TMath::Abs("+Var+"-"+CenValue+")"
