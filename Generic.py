@@ -49,6 +49,27 @@ def SqrtE(x,dx):
     if x!=0: return np.sqrt(x)*0.5*(dx/x)
     else: return 0.0
 
+def LnE(x,dx):
+    if x!=0: return (dx/x)
+    else: return 0.0
+
+def SmlbE(s,b):
+    if s!=0 and b!=0:
+        ds=np.sqrt(s); db=np.sqrt(b)
+        return DivE(s,np.sqrt(b),ds,SqrtE(b,db))
+    else: return 0.0
+
+def AsimovE(s,b):
+    #np.sqrt(2*((Ns+Nb)*np.log(1.+(Ns/Nb))-Ns))
+    if s!=0 and b!=0:
+        ds=np.sqrt(s); db=np.sqrt(b)
+        FractionE=DivE(s,b,ds,db)
+        LogE=LnE(1.+(s/b),FractionE)
+        MultipliE=MulE((s+b),np.log(1.+(s/b)),(ds+db),LogE)
+        InsidesqrtE=(2*MultipliE)+ds
+        return SqrtE(np.sqrt(2*((s+b)*np.log(1.+(s/b))-s)),InsidesqrtE)
+    else: return 0.0
+
 def EffE(eff,N):
     if N!=0: return np.sqrt((eff*(1-eff))/N)
     else: return 0.0
@@ -136,3 +157,64 @@ def AddCorrectError(Histo1,Histo2,Weight1,Weight2):
         print "sum histo:", BinCT, BinET
         Histo1.SetBinContent(j,BinCT)
         Histo1.SetBinError(j,BinET)
+
+#Function to calculate significance of observation
+def GetZHistos(CutType,CenValue,SignalTree,BkgTree,Var,BinsLim,CutApp):
+    """CutType: 
+                'w'-> window --------> CenValue must be also set
+                'g'-> great than
+                'l'-> less than
+    """
+    HistName1=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"BaseHist1"
+    HistName2=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"BaseHist2"
+    ZsmlbHistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"Z1Hist"
+    ZAsimovHistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"Z2Hist"
+    print Var+" >> "+HistName1+BinsLim
+    if CutType=="w":
+        WVar="TMath::Abs("+Var+"-"+CenValue+")"
+        SignalTree.Draw(WVar+" >> "+HistName1+BinsLim,CutApp)
+        BkgTree.Draw(WVar+" >> "+HistName2+BinsLim,CutApp)
+        TemHisto1=ROOT.gDirectory.Get(HistName1)
+        TemHisto2=ROOT.gDirectory.Get(HistName2)
+        Z1=TemHisto1.Clone(ZsmlbHistName)
+        ZAsimov=TemHisto1.Clone(ZAsimovHistName)
+        for j in xrange(1,TemHisto1.GetXaxis().GetNbins()+2):
+            Z1Bin=0.0; Z1Err=0.0; Z2Bin=0.0; Z2Err=0.0
+            if TemHisto2.Integral()!=0: #and TemHisto1.Integral()!=0:
+                Signal=TemHisto1.Integral(1,j)
+                Bkg=TemHisto2.Integral(1,j)
+                if Bkg==0.0: 
+                    Z1Bin=0.0; Z2Bin=0.0; Z1Err=0.0; Z2Err=0.0
+                else:
+                    Z1Bin=Signal/np.sqrt(Bkg)
+                    Z2Bin=np.sqrt(2*((Signal+Bkg)*np.log(1.+(Signal/Bkg))-Signal))
+                    Z1Err=SmlbE(Signal,Bkg)
+                    Z2Err=AsimovE(Signal,Bkg)
+            Z1.SetBinContent(j,Z1Bin); Z1.SetBinError(j,Z1Err)
+            ZAsimov.SetBinContent(j,Z2Bin); ZAsimov.SetBinError(j,Z2Err)
+    else:
+        SignalTree.Draw(Var+" >> "+HistName1+BinsLim,CutApp)
+        BkgTree.Draw(Var+" >> "+HistName2+BinsLim,CutApp)
+        TemHisto1=ROOT.gDirectory.Get(HistName1)
+        TemHisto2=ROOT.gDirectory.Get(HistName2)
+        Z1=TemHisto1.Clone(ZsmlbHistName)
+        ZAsimov=TemHisto1.Clone(ZAsimovHistName)
+        for j in xrange(1,TemHisto1.GetXaxis().GetNbins()+2):
+            Z1Bin=0.0; Z2Bin=0.0; Z1Err=0.0; Z2Err=0.0
+            if TemHisto2.Integral()!=0:
+                if CutType=="g":
+                    Signal=TemHisto1.Integral(j,TemHisto1.GetXaxis().GetNbins()+2)
+                    Bkg=TemHisto2.Integral(j,TemHisto2.GetXaxis().GetNbins()+2)
+                elif CutType=="l": 
+                    Signal=TemHisto1.Integral(1,j)
+                    Bkg=TemHisto2.Integral(1,j)
+                if Bkg==0.0: 
+                    Z1Bin=0.0; Z2Bin=0.0; Z1Err=0.0; Z2Err=0.0
+                else:
+                    Z1Bin=Signal/np.sqrt(Bkg)
+                    Z2Bin=np.sqrt(2*((Signal+Bkg)*np.log(1.+(Signal/Bkg))-Signal))
+                    Z1Err=SmlbE(Signal,Bkg)
+                    Z2Err=AsimovE(Signal,Bkg)
+            Z1.SetBinContent(j,Z1Bin); Z1.SetBinError(j,Z1Err)
+            ZAsimov.SetBinContent(j,Z2Bin); ZAsimov.SetBinError(j,Z2Err)
+    return Z1, ZAsimov
