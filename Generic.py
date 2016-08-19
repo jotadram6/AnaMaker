@@ -165,6 +165,8 @@ def GetZHistos(CutType,CenValue,SignalTree,BkgTree,Var,BinsLim,CutApp):
                 'g'-> great than
                 'l'-> less than
     """
+    TemHisto1=ROOT.TH1F()
+    TemHisto2=ROOT.TH1F()
     HistName1=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"BaseHist1"
     HistName2=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"BaseHist2"
     ZsmlbHistName=Var.replace("(","").replace(")","").replace("[","").replace("]","").replace(":","").replace(".","").replace("-","_").replace(" ","_").replace("&&","_and_").replace("&","_and_").replace("*","_").replace(">","g").replace("<","l")+"Z1Hist"
@@ -217,4 +219,4 @@ def GetZHistos(CutType,CenValue,SignalTree,BkgTree,Var,BinsLim,CutApp):
                     Z2Err=AsimovE(Signal,Bkg)
             Z1.SetBinContent(j,Z1Bin); Z1.SetBinError(j,Z1Err)
             ZAsimov.SetBinContent(j,Z2Bin); ZAsimov.SetBinError(j,Z2Err)
-    return Z1, ZAsimov
+    return Z1, ZAsimov, TemHisto1, TemHisto2
