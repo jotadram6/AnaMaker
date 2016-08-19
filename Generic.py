@@ -159,7 +159,7 @@ def AddCorrectError(Histo1,Histo2,Weight1,Weight2):
         Histo1.SetBinError(j,BinET)
 
 #Function to calculate significance of observation
-def GetZHistos(CutType,CenValue,SignalTree,BkgTree,Var,BinsLim,CutApp):
+def GetZHistos(CutType,CenValue,SignalTree,SignalWeight,BkgTree,BkgWeight,Var,BinsLim,CutApp):
     """CutType: 
                 'w'-> window --------> CenValue must be also set
                 'g'-> great than
@@ -176,8 +176,8 @@ def GetZHistos(CutType,CenValue,SignalTree,BkgTree,Var,BinsLim,CutApp):
         WVar="TMath::Abs("+Var+"-"+CenValue+")"
         SignalTree.Draw(WVar+" >> "+HistName1+BinsLim,CutApp)
         BkgTree.Draw(WVar+" >> "+HistName2+BinsLim,CutApp)
-        TemHisto1=ROOT.gDirectory.Get(HistName1)
-        TemHisto2=ROOT.gDirectory.Get(HistName2)
+        TemHisto1=ROOT.gDirectory.Get(HistName1); TemHisto1.Sumw2(); TemHisto1.Scale(SignalWeight)
+        TemHisto2=ROOT.gDirectory.Get(HistName2); TemHisto2.Sumw2(); TemHisto2.Scale(BkgWeight)
         Z1=TemHisto1.Clone(ZsmlbHistName)
         ZAsimov=TemHisto1.Clone(ZAsimovHistName)
         for j in xrange(1,TemHisto1.GetXaxis().GetNbins()+2):
@@ -197,8 +197,8 @@ def GetZHistos(CutType,CenValue,SignalTree,BkgTree,Var,BinsLim,CutApp):
     else:
         SignalTree.Draw(Var+" >> "+HistName1+BinsLim,CutApp)
         BkgTree.Draw(Var+" >> "+HistName2+BinsLim,CutApp)
-        TemHisto1=ROOT.gDirectory.Get(HistName1)
-        TemHisto2=ROOT.gDirectory.Get(HistName2)
+        TemHisto1=ROOT.gDirectory.Get(HistName1); TemHisto1.Sumw2(); TemHisto1.Scale(SignalWeight)
+        TemHisto2=ROOT.gDirectory.Get(HistName2); TemHisto2.Sumw2(); TemHisto2.Scale(BkgWeight)
         Z1=TemHisto1.Clone(ZsmlbHistName)
         ZAsimov=TemHisto1.Clone(ZAsimovHistName)
         for j in xrange(1,TemHisto1.GetXaxis().GetNbins()+2):
